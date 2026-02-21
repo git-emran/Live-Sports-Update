@@ -8,9 +8,10 @@ const port = 8000;
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("Hellow from Express!");
+  res.send("Hello from Express!");
 });
-app.get("/matches", matchRouter);
+
+app.use("/matches", matchRouter);
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
