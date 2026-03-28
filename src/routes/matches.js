@@ -41,9 +41,6 @@ matchRouter.get("/", async (req, res) => {
 
 matchRouter.post("/", async (req, res) => {
   const parsed = createMatchSchema.safeParse(req.body);
-  const {
-    data: { startTime, endTime, homeScore, awayScore },
-  } = parsed;
 
   if (!parsed.success) {
     return res.status(400).json({
@@ -51,6 +48,7 @@ matchRouter.post("/", async (req, res) => {
       details: JSON.stringify(parsed.error),
     });
   }
+  const { startTime, endTime, homeScore, awayScore } = parsed.data;
   try {
     const [event] = await db
       .insert(matches)
@@ -64,8 +62,8 @@ matchRouter.post("/", async (req, res) => {
       })
       .returning();
 
-    if (res.app.locals(broadCastMatchCreated)) {
-      res.app.locals.broadCastMatchCreated(event);
+    if (res.app.locals.broadcastMatchCreated) {
+      res.app.locals.broadcastMatchCreated(event);
     }
 
     res.status(201).json({ data: event });
