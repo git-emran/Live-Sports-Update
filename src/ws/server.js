@@ -27,4 +27,10 @@ export function attachWebSocketServer(server) {
 
     socket.on("error", console.error);
   });
+
+  function broadcastMatchCreated(match) {
+    broadcast(wss, { type: "match_created", data: match });
+  }
+
+  return { broadcastMatchCreated };
 }
