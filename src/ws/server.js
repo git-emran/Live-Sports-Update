@@ -1,17 +1,17 @@
 import { WebSocket, WebSocketServer } from "ws";
 
-const payloadsize = "1024 * 1024";
+const payloadsize = 1024 * 1024;
 
 function sendJson(socket, payload) {
   if (socket.readyState !== WebSocket.OPEN) return;
-
   socket.send(JSON.stringify(payload));
 }
 
 function broadcast(wss, payload) {
   for (const client of wss.clients) {
-    if (client.readyState !== WebSocket.OPEN) return;
-    socket.send(JSON.stringify(payload));
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(payload));
+    }
   }
 }
 
