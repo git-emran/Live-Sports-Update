@@ -10,6 +10,8 @@ const HOST = process.env.HOST || "0.0.0.0";
 const app = express();
 const server = http.createServer(app);
 
+app.set("trust proxy", true);
+
 app.use(express.json());
 
 app.get("/", (req, res) => {

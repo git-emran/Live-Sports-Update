@@ -1,4 +1,4 @@
-import arcjet, { detectBot, shield, slidingWindow } from "arcjet";
+import arcjet, { detectBot, fixedWindow, shield, slidingWindow } from "@arcjet/node";
 
 const arcjetKey = process.env.ARCJET_KEY;
 const arcjetMode = process.env.ARCJET_MODE === "DRY_RUN" ? "DRY_RUN" : "LIVE";
@@ -14,6 +14,11 @@ export const httpArcjet = arcjetKey
       key: arcjetKey,
       log: console,
       rules: [
+        fixedWindow({
+          characteristics: ["ip.src"],
+          max: 100,
+          window: "60s",
+        }),
         shield({ mode: arcjetMode }),
         detectBot({
           mode: arcjetMode,
@@ -30,6 +35,11 @@ export const wsArcjet = arcjetKey
       key: arcjetKey,
       log: console,
       rules: [
+        fixedWindow({
+          characteristics: ["ip.src"],
+          max: 100,
+          window: "60s",
+        }),
         shield({ mode: arcjetMode }),
         detectBot({
           mode: arcjetMode,
@@ -42,10 +52,16 @@ export const wsArcjet = arcjetKey
 
 export function securityMiddleware() {
   return async (req, res, next) => {
+    const clientIp =
+      req.ip ||
+      req.headers["x-forwarded-for"]?.split(",")[0] ||
+      req.socket?.remoteAddress ||
+      "127.0.0.1";
+
     if (!arcjetKey) return next();
 
     try {
-      const decision = await httpArcjet.protect(req);
+      const decision = await httpArcjet.protect(req, { ip: clientIp });
       if (decision.isDenied()) {
         if (decision.reason.isRateLimit()) {
           return res.status(503).json({ error: "Too many requests" });
