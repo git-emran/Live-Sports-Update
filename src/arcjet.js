@@ -23,3 +23,28 @@ export const wsArcjet = arcjetKey ? arcjet({
   ]
 }) : null;
 
+
+export function securityMiddleware(){
+  return async (req, res, next)=> {
+    if (!arcjetKey) return next()
+
+    try {
+      const decision = await httpArcjet.protect(req)
+      if (decision.isDenied()){
+        if (decision.reason.isRateLimit()){
+          return res.status(503).json({error: "Too many requests"})
+        }
+        return res.status(403).json({error: "forbidden"})
+      }
+      
+      
+    } catch (e) {
+      console.error("arcjet middleware error", e)
+      return res.status(503).json({error: "Service unavailable"})
+      
+    }
+
+    next()
+
+  }
+}
