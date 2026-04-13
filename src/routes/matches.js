@@ -8,7 +8,11 @@ import { db } from "../db/db.js";
 import { getMatchStatus } from "../utils/match-status.js";
 import { desc } from "drizzle-orm";
 
+import { commentaryRouter } from "./commentary.js";
+
 export const matchRouter = Router();
+
+matchRouter.use("/:id/commentary", commentaryRouter);
 const MAX_LIMIT = 100;
 
 matchRouter.get("/", async (req, res) => {
